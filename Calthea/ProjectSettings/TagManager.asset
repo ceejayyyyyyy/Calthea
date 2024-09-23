@@ -41,3 +41,30 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: New Layer 1
+    uniqueID: 3628767779
+    locked: 0
+  - name: New Layer 2
+    uniqueID: 4976387
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 2027030759
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 1941532823
+    locked: 0
+  - name: New Layer 5
+    uniqueID: 1269544617
+    locked: 0
+  - name: Player
+    uniqueID: 3997927855
+    locked: 0
+  - name: New Layer 6
+    uniqueID: 947303343
+    locked: 0
+  - name: New Layer 7
+    uniqueID: 4061359911
+    locked: 0
+  - name: New Layer 8
+    uniqueID: 967212845
+    locked: 0
