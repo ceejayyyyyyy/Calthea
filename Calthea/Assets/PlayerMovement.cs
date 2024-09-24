@@ -1,55 +1,88 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class movement : MonoBehaviour
 {
-    float horizontalInput;
-    float moveSpeed = 20f;
-    bool isFacingRight = false;
-    float jumpPower = 15f;
-    bool isJumping = false;
+    public Rigidbody2D rb;
 
-    Rigidbody2D rb;
+    [Header("Movement")]
+    public float moveSpeed = 3f;
+    float horizontalMovement;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
+    [Header("Jumping")]
+    public float jumpPower  = 10f;
+    public int maxJumps = 2;
+    int jumpsRemaining;
+
+    [Header("GroundCheck")]
+    public Transform groundCheckPos;
+    public Vector2 groundCheckSize = new Vector2(0.5f, 0.05f);
+    public LayerMask groundLayer;
+
+    [Header("Gravity")]
+    public float baseGravity = 2f;
+    public float maxFallSpeed = 18f;
+    public float fallSpeedMultiplier = 2f;
 
     // Update is called once per frame
     void Update()
     {
-        horizontalInput = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
+        GroundCheck();
+        Gravity();
+    }
 
-        FlipSprite();
-
-        if(Input.GetButtonDown("Jump") && !isJumping)
+    private void Gravity()
+    {
+        if (rb.velocity.y < 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpPower);
-            isJumping = true;
+            rb.gravityScale = baseGravity * fallSpeedMultiplier;
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -maxFallSpeed));
+        }
+        else
+        {
+            rb.gravityScale = baseGravity;
         }
     }
 
-    private void FixedUpdate()
+    public void Move(InputAction.CallbackContext context)
     {
-        rb.velocity = new Vector2 (horizontalInput * moveSpeed, rb.velocity.y);
+        horizontalMovement = context.ReadValue<Vector2>().x;
     }
 
-    void FlipSprite()
+    public void Jump(InputAction.CallbackContext context)
     {
-        if (isFacingRight && horizontalInput < 0f || !isFacingRight && horizontalInput > 0f)
+        if (jumpsRemaining > 0)
+        { 
+            if (context.performed)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpPower);
+                jumpsRemaining--;
+            }
+            else if (context.canceled)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+                jumpsRemaining--;
+            }
+
+        }
+       
+    }
+
+    private void GroundCheck()
+    {
+        if (Physics2D.OverlapBox(groundCheckPos.position, groundCheckSize, 0 , groundLayer))
         {
-            isFacingRight = !isFacingRight;
-            Vector3 ls = transform.localScale;
-            ls.x *= -1f;
-            transform.localScale = ls;
+            jumpsRemaining = maxJumps;
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnDrawGizmosSelected()
     {
-        isJumping |= false;
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(groundCheckPos.position, groundCheckSize);
     }
+
 }
