@@ -27,7 +27,7 @@ public class movement : MonoBehaviour
     public float fallSpeedMultiplier = 2f;
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
         GroundCheck();
