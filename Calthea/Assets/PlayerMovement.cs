@@ -17,6 +17,14 @@ public class PlayerMovement : MonoBehaviour
     public int maxJumps = 2;
     int jumpsRemaining;
 
+    // Coyote Time
+    public float coyoteTime = 0.2f;
+    float coyoteTimeCounter;
+
+    // Jump Buffer
+    public float jumpBufferTime = 0.1f;
+    float jumpBufferCounter;
+
     [Header("GroundCheck")]
     public Transform groundCheckPos;
     public Vector2 groundCheckSize = new Vector2(0.49f, 0.03f);
@@ -44,12 +52,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        jumpsRemaining = maxJumps; // Initialize jumps remaining
+        jumpsRemaining = maxJumps;
     }
 
     void Update()
     {
-        // Update horizontal movement
         ApplyGravity();
         GroundCheck();
         ProcessWallSlide();
@@ -60,23 +67,30 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
             Flip();
         }
-        
+
+        // Handle Coyote Time
+        if (!isGrounded)
+        {
+            coyoteTimeCounter -= Time.deltaTime;
+        }
+
+        // Handle Jump Buffer
+        jumpBufferCounter -= Time.deltaTime;
     }
 
     private void ApplyGravity()
     {
-        // Apply custom gravity scaling
-        if (rb.velocity.y < 0) // Only adjust when falling
+        if (rb.velocity.y < 0)
         {
             rb.gravityScale = baseGravity * fallSpeedMultiplier;
-            if (rb.velocity.y < -maxFallSpeed) // Limit the fall speed
+            if (rb.velocity.y < -maxFallSpeed)
             {
                 rb.velocity = new Vector2(rb.velocity.x, -maxFallSpeed);
             }
         }
         else
         {
-            rb.gravityScale = baseGravity; // Normal gravity when jumping or not falling
+            rb.gravityScale = baseGravity;
         }
     }
 
@@ -87,20 +101,29 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump(InputAction.CallbackContext context)
     {
-        if (jumpsRemaining > 0 && context.performed)
+        if (context.performed)
+        {
+            jumpBufferCounter = jumpBufferTime; // Buffer the jump input
+        }
+
+        // Check for jumping: coyote time for the first jump only
+        if (jumpsRemaining > 0 && (isGrounded || (coyoteTimeCounter > 0 && jumpsRemaining == maxJumps) || jumpBufferCounter > 0))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpPower);
             jumpsRemaining--;
+
+            // Reset jump buffer after a jump
+            jumpBufferCounter = 0;
         }
 
-        //Wall Jump
+        // Wall Jump
         if (context.performed && wallJumpTimer > 0)
         {
             isWallJumping = true;
             rb.velocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y);
             wallJumpTimer = 0;
 
-            //Force flip
+            // Force flip
             if (transform.localScale.x != wallJumpDirection)
             {
                 isFacingRight = !isFacingRight;
@@ -119,6 +142,7 @@ public class PlayerMovement : MonoBehaviour
         {
             jumpsRemaining = maxJumps; // Reset jumps when grounded
             isGrounded = true;
+            coyoteTimeCounter = coyoteTime; // Reset coyote time
         }
         else
         {
@@ -133,7 +157,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void ProcessWallSlide()
     {
-        if (!isGrounded & WallCheck() & horizontalMovement != 0)
+        if (!isGrounded && WallCheck() && horizontalMovement != 0)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
@@ -154,7 +178,7 @@ public class PlayerMovement : MonoBehaviour
 
             CancelInvoke(nameof(CancelWallJump));
         }
-        else if (wallJumpTimer  > 0f)
+        else if (wallJumpTimer > 0f)
         {
             wallJumpTimer -= Time.deltaTime;
         }
