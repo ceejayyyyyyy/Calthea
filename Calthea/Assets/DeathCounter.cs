@@ -1,37 +1,38 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
 
 public class DeathCounter : MonoBehaviour
 {
-    private int deathCount = 0;
+    private int deathCount;
 
     public void IncreaseDeathCount()
     {
-        Debug.Log("IncreaseDeathCount called");
         deathCount++;
-        Debug.Log("Death count incremented: " + deathCount);
-        StartCoroutine(SendDeathCount(deathCount));
     }
 
-    IEnumerator SendDeathCount(int count)
+    public int GetDeathCount()
     {
-        Debug.Log("SendDeathCount coroutine started");
-        WWWForm form = new WWWForm();
-        form.AddField("death_count", count);
+        return deathCount;
+    }
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/game_api/update_deaths.php", form))
+    public void SendDeathCountToServer()
+    {
+        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        formData.Add(new MultipartFormDataSection("death_count", deathCount.ToString()));
+
+        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/game_api/update_deaths.php", formData))
         {
-            yield return www.SendWebRequest();
+            www.SendWebRequest();
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log("Error: " + www.error);
+                Debug.LogError("Error: " + www.error);
             }
             else
             {
-                Debug.Log("Death count updated successfully");
-                Debug.Log("Response: " + www.downloadHandler.text);
+                Debug.Log("Form upload complete!");
             }
         }
     }

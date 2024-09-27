@@ -7,6 +7,8 @@ public class GameController : MonoBehaviour
     Vector2 checkpointPos;
     SpriteRenderer spriteRenderer;
     Rigidbody2D rb;
+    public DeathCounter deathCounter;
+    public PlayerDeathHandler playerDeathHandler;
 
     private void Awake()
     {
@@ -34,6 +36,14 @@ public class GameController : MonoBehaviour
 
     void Die()
     {
+        if (playerDeathHandler != null)
+        {
+            playerDeathHandler.OnPlayerDeath();
+        }
+        if (deathCounter != null)
+        {
+            deathCounter.IncreaseDeathCount();
+        }
         StartCoroutine(Respawn(0.5f));
     }
 

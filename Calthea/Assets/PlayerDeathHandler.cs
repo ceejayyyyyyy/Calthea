@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerDeathHandler : MonoBehaviour
@@ -7,13 +9,16 @@ public class PlayerDeathHandler : MonoBehaviour
     void Start()
     {
         deathCounter = FindObjectOfType<DeathCounter>();
+        Debug.Log("DeathCounter found: " + (deathCounter != null));
     }
 
     public void OnPlayerDeath()
     {
+        Debug.Log("OnPlayerDeath called");
         if (deathCounter != null)
         {
             deathCounter.IncreaseDeathCount();
+            deathCounter.SendDeathCountToServer();
         }
         else
         {
