@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
+    public Animator animator;
     bool isFacingRight = true;
 
     [Header("Movement")]
@@ -52,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        animator = GetComponent<Animator>();
         jumpsRemaining = maxJumps;
     }
 
@@ -76,6 +78,11 @@ public class PlayerMovement : MonoBehaviour
 
         // Handle Jump Buffer
         jumpBufferCounter -= Time.deltaTime;
+
+        animator.SetFloat("yVelocity", rb.velocity.y);
+        animator.SetFloat("magnitude", rb.velocity.magnitude);
+        animator.SetBool("isWallsliding", isWallSliding);
+
     }
 
     private void ApplyGravity()
@@ -114,6 +121,9 @@ public class PlayerMovement : MonoBehaviour
 
             // Reset jump buffer after a jump
             jumpBufferCounter = 0;
+
+            //To trigger the "jump" animation
+            animator.SetTrigger("jump");
         }
 
         // Wall Jump
@@ -122,6 +132,7 @@ public class PlayerMovement : MonoBehaviour
             isWallJumping = true;
             rb.velocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y);
             wallJumpTimer = 0;
+            animator.SetTrigger("jump");
 
             // Force flip
             if (transform.localScale.x != wallJumpDirection)
