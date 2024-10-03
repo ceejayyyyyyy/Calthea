@@ -9,7 +9,10 @@ public class DeathCounter : MonoBehaviour
 
     public void IncreaseDeathCount()
     {
+        Debug.Log("IncreaseDeathCount method called");
         deathCount++;
+        Debug.Log("Death count: " + deathCount);
+        StartCoroutine(SendDeathCountToServer());
     }
 
     public int GetDeathCount()
@@ -17,14 +20,15 @@ public class DeathCounter : MonoBehaviour
         return deathCount;
     }
 
-    public void SendDeathCountToServer()
+    public IEnumerator SendDeathCountToServer()
     {
+        Debug.Log("SendDeathCountToServer coroutine started");
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
         formData.Add(new MultipartFormDataSection("death_count", deathCount.ToString()));
 
         using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/game_api/update_deaths.php", formData))
         {
-            www.SendWebRequest();
+            yield return www.SendWebRequest();
 
             if (www.result != UnityWebRequest.Result.Success)
             {

@@ -14,10 +14,12 @@ public class PlayerDeathHandler : MonoBehaviour
 
     public void OnPlayerDeath()
     {
-        Debug.Log("OnPlayerDeath called");
+        Debug.Log("OnPlayerDeath method called");
         if (deathCounter != null)
         {
+            Debug.Log("Death count before update: " + deathCounter.GetDeathCount());
             deathCounter.IncreaseDeathCount();
+            Debug.Log("Death count after update: " + deathCounter.GetDeathCount());
             deathCounter.SendDeathCountToServer();
         }
         else

@@ -20,6 +20,7 @@ public class Checkpoint : MonoBehaviour
             if (player != null)
             {
                 gameController = player.GetComponent<GameController>();
+                Debug.Log("GameController found: " + gameController);
             }
         }
     }
@@ -30,6 +31,7 @@ public class Checkpoint : MonoBehaviour
         {
             gameController.UpdateCheckpoint(respawnPoint.position);
             Debug.Log("Checkpoint activated!");
+            Debug.Log("Respawn point: " + respawnPoint.position);
             spriteRenderer.sprite = active;
         }
     }

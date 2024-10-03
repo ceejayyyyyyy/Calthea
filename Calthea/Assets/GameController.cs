@@ -36,13 +36,10 @@ public class GameController : MonoBehaviour
 
     void Die()
     {
+        Debug.Log("Die method called");
         if (playerDeathHandler != null)
         {
             playerDeathHandler.OnPlayerDeath();
-        }
-        if (deathCounter != null)
-        {
-            deathCounter.IncreaseDeathCount();
         }
         StartCoroutine(Respawn(0.5f));
     }
